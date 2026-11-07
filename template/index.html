@@ -1,0 +1,31 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>Playful Pop captions</title>
+<style>
+{{FONT_FACES}}
+:root { {{VARS}} }
+html, body { margin: 0; padding: 0; width: {{WIDTH}}px; height: {{HEIGHT}}px; background: var(--ink); overflow: hidden; }
+#stage { position: relative; width: {{WIDTH}}px; height: {{HEIGHT}}px; overflow: hidden; background: var(--ink); }
+#stage video { position: absolute; left: 0; top: 0; width: {{WIDTH}}px; height: {{HEIGHT}}px; object-fit: cover; }
+#under, #captions { position: absolute; left: 0; top: 0; width: {{WIDTH}}px; height: {{HEIGHT}}px; pointer-events: none; }
+.layer { position: absolute; left: 0; top: 0; width: 100%; height: 100%; }
+.w { position: absolute; }
+.w svg, .w span { pointer-events: none; }
+</style>
+</head>
+<body>
+<div id="stage" data-composition-id="{{ID}}" data-width="{{WIDTH}}" data-height="{{HEIGHT}}" data-fps="{{FPS}}" data-duration="{{DURATION}}">
+  <video id="source-video" class="clip" data-start="0" data-duration="{{DURATION}}" data-track-index="0" src="{{VIDEO}}" muted playsinline></video>
+{{AUDIO}}
+  <div id="under" class="clip" data-start="0" data-duration="{{DURATION}}" data-track-index="1"></div>
+  <div id="captions" class="clip" data-start="0" data-duration="{{DURATION}}" data-track-index="2"></div>
+</div>
+<script src="vendor/gsap.min.js"></script>
+<script>window.__POP__ = {{PLAN_JSON}};</script>
+<script>
+{{SCRIPT}}
+</script>
+</body>
+</html>

@@ -1,0 +1,31 @@
+{
+  "name": "hyperframes-playful-pop",
+  "version": "1.0.0",
+  "private": true,
+  "type": "module",
+  "description": "Playful Pop kinetic-typography captions on HyperFrames (HeyGen). Whisper -> captions.json -> deterministic HTML/GSAP composition -> local render.",
+  "engines": { "node": ">=22" },
+  "scripts": {
+    "transcribe": "node node_modules/tsx/dist/cli.mjs scripts/transcribe.ts",
+    "analyze": "node node_modules/tsx/dist/cli.mjs scripts/analyze.ts",
+    "build": "node node_modules/tsx/dist/cli.mjs scripts/build.ts",
+    "dev": "node node_modules/tsx/dist/cli.mjs scripts/run.ts dev",
+    "preview": "node node_modules/tsx/dist/cli.mjs scripts/run.ts preview",
+    "render": "node node_modules/tsx/dist/cli.mjs scripts/run.ts render",
+    "check": "node node_modules/tsx/dist/cli.mjs scripts/check.ts",
+    "check:static": "node node_modules/tsx/dist/cli.mjs scripts/check.ts --static",
+    "test": "node node_modules/tsx/dist/cli.mjs tests/run-tests.ts",
+    "test:browser": "node node_modules/tsx/dist/cli.mjs tests/browser-smoke.ts",
+    "fonts": "node node_modules/tsx/dist/cli.mjs scripts/fetch-fonts.ts"
+  },
+  "dependencies": {
+    "gsap": "^3.12.5",
+    "hyperframes": "latest"
+  },
+  "devDependencies": {
+    "esbuild": "^0.25.0",
+    "puppeteer": "^24.0.0",
+    "tsx": "^4.19.0",
+    "typescript": "^5.6.0"
+  }
+}

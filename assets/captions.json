@@ -1,0 +1,527 @@
+{
+  "fps": 30,
+  "chunks": [
+    {
+      "startMs": 300,
+      "endMs": 2280,
+      "lines": [
+        {
+          "words": [
+            {
+              "text": "Twenty",
+              "startMs": 300,
+              "endMs": 580,
+              "role": "accent"
+            },
+            {
+              "text": "years",
+              "startMs": 630,
+              "endMs": 910,
+              "role": "accent"
+            }
+          ]
+        },
+        {
+          "words": [
+            {
+              "text": "ago",
+              "startMs": 960,
+              "endMs": 1240,
+              "role": "normal"
+            },
+            {
+              "text": "I",
+              "startMs": 1290,
+              "endMs": 1570,
+              "role": "connector"
+            },
+            {
+              "text": "built",
+              "startMs": 1620,
+              "endMs": 1900,
+              "role": "normal"
+            },
+            {
+              "text": "my",
+              "startMs": 1950,
+              "endMs": 2230,
+              "role": "connector"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "startMs": 2280,
+      "endMs": 3090,
+      "lines": [
+        {
+          "words": [
+            {
+              "text": "first",
+              "startMs": 2280,
+              "endMs": 2560,
+              "role": "accent"
+            },
+            {
+              "text": "company",
+              "startMs": 2610,
+              "endMs": 2890,
+              "role": "hero"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "startMs": 3240,
+      "endMs": 4380,
+      "lines": [
+        {
+          "words": [
+            {
+              "text": "in",
+              "startMs": 3240,
+              "endMs": 3520,
+              "role": "connector"
+            },
+            {
+              "text": "a",
+              "startMs": 3390,
+              "endMs": 3670,
+              "role": "connector"
+            },
+            {
+              "text": "tiny",
+              "startMs": 3720,
+              "endMs": 4000,
+              "role": "normal"
+            }
+          ]
+        },
+        {
+          "words": [
+            {
+              "text": "garage.",
+              "startMs": 4050,
+              "endMs": 4330,
+              "role": "accent"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "startMs": 4380,
+      "endMs": 6180,
+      "lines": [
+        {
+          "words": [
+            {
+              "text": "It",
+              "startMs": 4380,
+              "endMs": 4660,
+              "role": "connector"
+            },
+            {
+              "text": "was",
+              "startMs": 4710,
+              "endMs": 4990,
+              "role": "connector"
+            },
+            {
+              "text": "TERRIBLE,",
+              "startMs": 5040,
+              "endMs": 5320,
+              "role": "hero"
+            }
+          ]
+        },
+        {
+          "words": [
+            {
+              "text": "honestly,",
+              "startMs": 5370,
+              "endMs": 5650,
+              "role": "accent"
+            },
+            {
+              "text": "but",
+              "startMs": 5700,
+              "endMs": 5980,
+              "role": "connector"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "startMs": 6330,
+      "endMs": 7140,
+      "lines": [
+        {
+          "words": [
+            {
+              "text": "we",
+              "startMs": 6330,
+              "endMs": 6610,
+              "role": "connector"
+            },
+            {
+              "text": "kept",
+              "startMs": 6480,
+              "endMs": 6760,
+              "role": "normal"
+            },
+            {
+              "text": "going!",
+              "startMs": 6810,
+              "endMs": 7090,
+              "role": "accent"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "startMs": 7140,
+      "endMs": 9270,
+      "lines": [
+        {
+          "words": [
+            {
+              "text": "By",
+              "startMs": 7140,
+              "endMs": 7420,
+              "role": "connector"
+            },
+            {
+              "text": "2019",
+              "startMs": 7470,
+              "endMs": 7750,
+              "role": "normal"
+            },
+            {
+              "text": "we",
+              "startMs": 7800,
+              "endMs": 8080,
+              "role": "connector"
+            }
+          ]
+        },
+        {
+          "words": [
+            {
+              "text": "had",
+              "startMs": 8130,
+              "endMs": 8410,
+              "role": "normal"
+            },
+            {
+              "text": "grown",
+              "startMs": 8460,
+              "endMs": 8740,
+              "role": "accent"
+            },
+            {
+              "text": "to",
+              "startMs": 8790,
+              "endMs": 9070,
+              "role": "connector"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "startMs": 9420,
+      "endMs": 9900,
+      "lines": [
+        {
+          "words": [
+            {
+              "text": "150",
+              "startMs": 9420,
+              "endMs": 9700,
+              "role": "hero"
+            },
+            {
+              "text": "people.",
+              "startMs": 9570,
+              "endMs": 9850,
+              "role": "accent"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "startMs": 9900,
+      "endMs": 10890,
+      "lines": [
+        {
+          "words": [
+            {
+              "text": "Nobody",
+              "startMs": 9900,
+              "endMs": 10180,
+              "role": "accent"
+            },
+            {
+              "text": "believed",
+              "startMs": 10230,
+              "endMs": 10510,
+              "role": "hero"
+            },
+            {
+              "text": "it.",
+              "startMs": 10560,
+              "endMs": 10840,
+              "role": "connector"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "startMs": 10890,
+      "endMs": 12360,
+      "lines": [
+        {
+          "words": [
+            {
+              "text": "Then",
+              "startMs": 10890,
+              "endMs": 11170,
+              "role": "connector"
+            },
+            {
+              "text": "everything",
+              "startMs": 11220,
+              "endMs": 11500,
+              "role": "hero"
+            }
+          ]
+        },
+        {
+          "words": [
+            {
+              "text": "changed",
+              "startMs": 11550,
+              "endMs": 11830,
+              "role": "accent"
+            },
+            {
+              "text": "overnight,",
+              "startMs": 11880,
+              "endMs": 12160,
+              "role": "accent"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "startMs": 12510,
+      "endMs": 13980,
+      "lines": [
+        {
+          "words": [
+            {
+              "text": "and",
+              "startMs": 12510,
+              "endMs": 12790,
+              "role": "connector"
+            },
+            {
+              "text": "the",
+              "startMs": 12660,
+              "endMs": 12940,
+              "role": "connector"
+            },
+            {
+              "text": "future",
+              "startMs": 12990,
+              "endMs": 13270,
+              "role": "accent"
+            }
+          ]
+        },
+        {
+          "words": [
+            {
+              "text": "looked",
+              "startMs": 13320,
+              "endMs": 13600,
+              "role": "accent"
+            },
+            {
+              "text": "incredible.",
+              "startMs": 13650,
+              "endMs": 13930,
+              "role": "hero"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "startMs": 13980,
+      "endMs": 15450,
+      "lines": [
+        {
+          "words": [
+            {
+              "text": "Now",
+              "startMs": 13980,
+              "endMs": 14260,
+              "role": "normal"
+            },
+            {
+              "text": "we",
+              "startMs": 14310,
+              "endMs": 14590,
+              "role": "connector"
+            },
+            {
+              "text": "ship",
+              "startMs": 14640,
+              "endMs": 14920,
+              "role": "normal"
+            }
+          ]
+        },
+        {
+          "words": [
+            {
+              "text": "products",
+              "startMs": 14970,
+              "endMs": 15250,
+              "role": "hero"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "startMs": 15600,
+      "endMs": 17070,
+      "lines": [
+        {
+          "words": [
+            {
+              "text": "that",
+              "startMs": 15600,
+              "endMs": 15880,
+              "role": "connector"
+            },
+            {
+              "text": "millions",
+              "startMs": 15750,
+              "endMs": 16030,
+              "role": "accent"
+            },
+            {
+              "text": "of",
+              "startMs": 16080,
+              "endMs": 16360,
+              "role": "connector"
+            }
+          ]
+        },
+        {
+          "words": [
+            {
+              "text": "customers",
+              "startMs": 16410,
+              "endMs": 16690,
+              "role": "hero"
+            },
+            {
+              "text": "love.",
+              "startMs": 16740,
+              "endMs": 17020,
+              "role": "normal"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "startMs": 17070,
+      "endMs": 17400,
+      "lines": [
+        {
+          "words": [
+            {
+              "text": "Simple.",
+              "startMs": 17070,
+              "endMs": 17350,
+              "role": "accent"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "startMs": 17400,
+      "endMs": 17730,
+      "lines": [
+        {
+          "words": [
+            {
+              "text": "Fast.",
+              "startMs": 17400,
+              "endMs": 17680,
+              "role": "accent"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "startMs": 17730,
+      "endMs": 18060,
+      "lines": [
+        {
+          "words": [
+            {
+              "text": "Beautiful.",
+              "startMs": 17730,
+              "endMs": 18010,
+              "role": "hero"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "startMs": 18060,
+      "endMs": 19320,
+      "lines": [
+        {
+          "words": [
+            {
+              "text": "Try",
+              "startMs": 18060,
+              "endMs": 18340,
+              "role": "normal"
+            },
+            {
+              "text": "it",
+              "startMs": 18690,
+              "endMs": 18970,
+              "role": "connector"
+            },
+            {
+              "text": "today.",
+              "startMs": 18840,
+              "endMs": 19120,
+              "role": "accent"
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}
