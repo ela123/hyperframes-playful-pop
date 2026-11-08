@@ -13,6 +13,10 @@ export function pickEmphasis(
   prevAccent: EmphasisName | null,
   preset: PresetName = "playful-pop",
 ): EmphasisName[] {
+  if (preset === "quiet-art") {
+    if (role === "hero") return ["quiet-underline"];
+    return [];
+  }
   if (preset === "minimal-pro") {
     if (role === "hero") return ["pill-highlight"];
     if (role === "accent") return ["accent-color"];
@@ -46,6 +50,12 @@ export function emphasisState(names: EmphasisName[], f: number, dur: number, wob
   if (f < 0 || names.length === 0) return s;
   for (const n of names) {
     switch (n) {
+      case "quiet-underline": {
+        const wipe = clamp01(f / 6);
+        s.underline = easeOutCubic(wipe);
+        s.markerActive = f >= 0;
+        break;
+      }
       case "pill-highlight": {
         const wipe = clamp01(f / 3);
         const release = clamp01((f - dur) / 3);

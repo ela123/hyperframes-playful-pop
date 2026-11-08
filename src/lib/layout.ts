@@ -6,6 +6,7 @@ import { BASE_FONT_PX, FONTS, getPresetBaseFontPx, getPresetFonts, getPresetScal
 
 export function displayText(role: Role, text: string, preset: PresetName = "playful-pop"): string {
   if (preset === "cinematic") return text.toUpperCase();
+  if (preset === "quiet-art") return text;
   if (preset === "minimal-pro") return role === "connector" ? text.toLowerCase() : text;
   return role === "hero" ? text.toUpperCase() : role === "connector" ? text.toLowerCase() : text;
 }

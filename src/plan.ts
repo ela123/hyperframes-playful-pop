@@ -136,6 +136,11 @@ function blobPath(w: number, h: number, inset: number, seed: number): string {
   );
 }
 
+function cleanUnderlinePath(textW: number, padX: number, y: number): { d: string; len: number } {
+  const d = `M${round2(padX)},${round2(y)} L${round2(padX + textW)},${round2(y)}`;
+  return { d, len: round2(textW) };
+}
+
 function underlinePath(textW: number, padX: number, y: number, fontPx: number, seed: number): { d: string; len: number } {
   const r = rng(seed);
   const seg = Math.max(2, Math.round(textW / (fontPx * 0.45)));
@@ -205,7 +210,13 @@ export function buildPlan(captions: CaptionsFile, measures: Measures, cfg: PopCo
   const cycle = getPresetCycle(cfg.preset);
   const isPop = cfg.preset === "playful-pop";
   const defaultNormalColor: ColorName =
-    cfg.preset === "minimal-pro" ? "snowWhite" : cfg.preset === "cinematic" ? "platinumWhite" : "cream";
+    cfg.preset === "quiet-art"
+      ? "quietWhite"
+      : cfg.preset === "minimal-pro"
+        ? "snowWhite"
+        : cfg.preset === "cinematic"
+          ? "platinumWhite"
+          : "cream";
 
   fitted.forEach((ft, ci) => {
     const { src, layout, scale } = ft;
@@ -232,8 +243,13 @@ export function buildPlan(captions: CaptionsFile, measures: Measures, cfg: PopCo
       if (role === "hero" || role === "accent") color = cycle[colorCursor++ % cycle.length];
       const hero = role === "hero";
       const back = (isPop && hero) ? blobPath(wb.box.w, wb.box.h, wb.fontPx * 0.03, derivedSeed(seed, 6)) : "";
-      const needsUl = isPop && emphasis.includes("doodle-underline");
-      const ul = needsUl ? underlinePath(wb.textW, wb.padX, wb.padY + wb.ascentPx + wb.descentPx * 0.45, wb.fontPx, derivedSeed(seed, 7)) : { d: "", len: 0 };
+      const isQuietArt = cfg.preset === "quiet-art";
+      const needsUl = (isPop && emphasis.includes("doodle-underline")) || (isQuietArt && emphasis.includes("quiet-underline"));
+      const ul = needsUl
+        ? (isQuietArt
+            ? cleanUnderlinePath(wb.textW, wb.padX, wb.padY + wb.ascentPx + wb.descentPx * 0.35)
+            : underlinePath(wb.textW, wb.padX, wb.padY + wb.ascentPx + wb.descentPx * 0.45, wb.fontPx, derivedSeed(seed, 7)))
+        : { d: "", len: 0 };
       const nStars = (isPop && hero) ? rng(derivedSeed(seed, 8)).int(q.stars[0], q.stars[1]) : 0;
       const sr = rng(derivedSeed(seed, 9));
       const stars: StarSpec[] = [];

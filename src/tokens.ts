@@ -27,6 +27,12 @@ export const COLORS: Record<ColorName, string> = {
   champagne: "#FDE68A",
   cinematicTeal: "#2DD4BF",
   deepCrimson: "#E11D48",
+  // Quiet Art palette (calm, warm, editorial)
+  quietWhite: "#FAF8F5",
+  quietBackdrop: "#121110",
+  quietAmber: "#D97736",
+  quietOchre: "#C88A3A",
+  quietUnderline: "#D97736",
 };
 
 /** Hero + accent words walk this cycle (global counter => never the same color twice in a row). */
@@ -34,6 +40,8 @@ export const CYCLE: ColorName[] = ["pink", "yellow", "sky", "mint", "violet"];
 
 export function getPresetCycle(preset: PresetName): ColorName[] {
   switch (preset) {
+    case "quiet-art":
+      return ["quietAmber", "quietOchre"];
     case "minimal-pro":
       return ["emeraldAccent", "electricBlue", "amberGold"];
     case "cinematic":
@@ -59,6 +67,16 @@ export const FONTS: Record<Role, FontSpec> = {
 };
 
 export function getPresetFonts(preset: PresetName, overrideFamily?: string): Record<Role, FontSpec> {
+  if (preset === "quiet-art") {
+    const fam = overrideFamily || "EB Garamond";
+    const fallback = "'EB Garamond', 'Garamond', 'Baskerville', 'Georgia', serif";
+    return {
+      hero: { family: fam, weight: 700, file: "EBGaramond-700.woff2", fallback },
+      accent: { family: fam, weight: 400, file: "EBGaramond-400.woff2", fallback },
+      normal: { family: fam, weight: 400, file: "EBGaramond-400.woff2", fallback },
+      connector: { family: fam, weight: 400, file: "EBGaramond-400.woff2", fallback },
+    };
+  }
   if (preset === "minimal-pro") {
     const fam = overrideFamily || "Inter";
     const fallback = "-apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif";
@@ -94,12 +112,16 @@ export function getPresetFonts(preset: PresetName, overrideFamily?: string): Rec
 export const FONT_FACES = [
   { family: "Lilita One", file: "LilitaOne-Regular.woff2", weight: "400" },
   { family: "Fredoka", file: "Fredoka-Variable.woff2", weight: "300 700" },
+  { family: "EB Garamond", file: "EBGaramond-400.woff2", weight: "400" },
+  { family: "EB Garamond", file: "EBGaramond-700.woff2", weight: "700" },
 ];
 
 export const SCALE: Record<Role, number> = { hero: 2.0, accent: 1.35, normal: 1.0, connector: 0.6 };
 
 export function getPresetScale(preset: PresetName): Record<Role, number> {
   switch (preset) {
+    case "quiet-art":
+      return { hero: 1.12, accent: 1.0, normal: 1.0, connector: 0.95 };
     case "minimal-pro":
       return { hero: 1.32, accent: 1.16, normal: 1.0, connector: 0.88 };
     case "cinematic":
@@ -115,6 +137,8 @@ export const BASE_FONT_PX = 78;           // x unit
 
 export function getPresetBaseFontPx(preset: PresetName, mult = 1): number {
   switch (preset) {
+    case "quiet-art":
+      return 54 * mult;
     case "minimal-pro":
       return 64 * mult;
     case "cinematic":
@@ -163,7 +187,7 @@ export const TIMING = {
   minPhase: 2,            // floor when durations are shortened
   entranceFrames: {
     "sticker-slap": 8, "spin-pop": 8, jelly: 8, "drop-bounce": 8, pop: 6, "wiggle-in": 8, "fade-pop": 4,
-    "clean-fade": 4, "slide-fade-up": 5, "cinematic-drift": 6,
+    "clean-fade": 4, "slide-fade-up": 5, "cinematic-drift": 6, "soft-rise": 10,
   } as Record<string, number>,
   markerWipe: 4,
   markerRelease: 3,

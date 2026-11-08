@@ -22,6 +22,10 @@ export function pickEntrance(
   if (animStyle === "scale-punch") return role === "hero" ? "pop" : "clean-fade";
   if (animStyle === "static") return "clean-fade";
 
+  if (preset === "quiet-art") {
+    return "soft-rise";
+  }
+
   if (preset === "minimal-pro") {
     switch (role) {
       case "hero":
@@ -56,6 +60,10 @@ export function entranceState(name: EntranceName, p: number, u: number, wobbleSi
   if (p >= 1) return IDENTITY;
   const fadeIn = (k: number): number => clamp01(p * k);
   switch (name) {
+    case "soft-rise": {
+      const y = lerp(14 * u, 0, easeOutCubic(p));
+      return { o: fadeIn(2.5), sx: 1, sy: 1, rot: 0, x: 0, y };
+    }
     case "clean-fade":
       return { o: fadeIn(4), sx: 1, sy: 1, rot: 0, x: 0, y: 0 };
     case "slide-fade-up": {

@@ -55,14 +55,15 @@ export function chunkVis(c: ChunkPlan, frame: number, cfg: PopConfig): ChunkVis 
 
   let sx = 0, sy = 0;
   for (const sk of c.shakes) { const o = shakeOffset(frame - sk.frame, sk.dx, sk.dy, u); sx += o.x; sy += o.y; }
-  const par = parallax((frame - c.startFrame) / Math.max(1, c.endFrame - c.startFrame));
+  const isQuietArt = cfg.preset === "quiet-art";
+  const par = isQuietArt ? { text: 1, bg: 1 } : parallax((frame - c.startFrame) / Math.max(1, c.endFrame - c.startFrame));
 
   return {
     visible,
     shake: { x: r3(sx), y: r3(sy) },
     textScale: r3(par.text), bgScale: r3(par.bg),
     lines: lineExit.map((p, i) => {
-      const e = exitState(p, c.exitRots[i]);
+      const e = exitState(p, c.exitRots[i], isQuietArt);
       return { transform: `rotate(${r3(e.rot)}deg) scale(${r3(e.scale)})`, o: e.o };
     }),
     words: c.words.map((w) => wordVis(w, frame, u)),

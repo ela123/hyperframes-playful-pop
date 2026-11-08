@@ -209,6 +209,7 @@ function bindChunk(pool: Pool, c: ChunkPlan, cfg: Plan["config"]): void {
   const isPop = preset === "playful-pop";
   const isMinPro = preset === "minimal-pro";
   const isCinematic = preset === "cinematic";
+  const isQuietArt = preset === "quiet-art";
 
   const origin = `${c.origin.x}px ${c.origin.y}px`;
   pool.bg.style.transformOrigin = origin;
@@ -233,6 +234,19 @@ function bindChunk(pool: Pool, c: ChunkPlan, cfg: Plan["config"]): void {
     pool.backdrop.style.background = `linear-gradient(to bottom, ${withAlpha(COLORS.obsidianDark, 0)}, ${withAlpha(COLORS.obsidianDark, 0.72)} 30%, ${withAlpha(COLORS.obsidianDark, 0.72)} 70%, ${withAlpha(COLORS.obsidianDark, 0)})`;
     pool.backdrop.style.borderRadius = "0";
     pool.backdrop.style.boxShadow = "none";
+  } else if (isQuietArt) {
+    if (cfg.footageIsLight) {
+      pool.backdrop.style.display = "block";
+      pool.backdrop.style.left = px(Math.max(0, c.bbox.x - 20 * cfg.unit));
+      pool.backdrop.style.top = px(Math.max(0, c.bbox.y - 10 * cfg.unit));
+      pool.backdrop.style.width = px(c.bbox.w + 40 * cfg.unit);
+      pool.backdrop.style.height = px(c.bbox.h + 20 * cfg.unit);
+      pool.backdrop.style.background = withAlpha(COLORS.quietBackdrop, 0.48);
+      pool.backdrop.style.borderRadius = px(8 * cfg.unit);
+      pool.backdrop.style.boxShadow = `0 ${2 * cfg.unit}px ${10 * cfg.unit}px rgba(0,0,0,0.25)`;
+    } else {
+      pool.backdrop.style.display = "none";
+    }
   } else {
     pool.backdrop.style.display = "none";
   }
@@ -286,6 +300,11 @@ function bindChunk(pool: Pool, c: ChunkPlan, cfg: Plan["config"]): void {
       t.style.setProperty("-webkit-text-stroke", "0");
       t.style.textShadow = `0 ${2 * cfg.unit}px ${6 * cfg.unit}px rgba(0,0,0,0.65)`;
       t.style.letterSpacing = "-0.01em";
+    } else if (isQuietArt) {
+      t.style.color = w.role === "hero" ? col(w.color) : COLORS.quietWhite;
+      t.style.setProperty("-webkit-text-stroke", "0");
+      t.style.textShadow = `0 ${1.5 * cfg.unit}px ${5 * cfg.unit}px ${withAlpha(COLORS.quietBackdrop, 0.65)}`;
+      t.style.letterSpacing = "0.035em";
     } else {
       // Cinematic
       t.style.color = w.role === "hero" ? col(w.color) : w.role === "accent" ? col(w.color) : COLORS.platinumWhite;
@@ -349,7 +368,7 @@ function bindChunk(pool: Pool, c: ChunkPlan, cfg: Plan["config"]): void {
     }
 
     // Underline
-    if (w.emphasis.includes("doodle-underline")) {
+    if (w.emphasis.includes("doodle-underline") || w.emphasis.includes("quiet-underline")) {
       const ulSvg = slot.root.querySelector("svg:last-of-type") as SVGElement;
       if (ulSvg) {
         ulSvg.style.display = "block";
@@ -357,14 +376,22 @@ function bindChunk(pool: Pool, c: ChunkPlan, cfg: Plan["config"]): void {
         ulSvg.setAttribute("height", String(w.box.h));
         ulSvg.setAttribute("viewBox", `0 0 ${w.box.w} ${w.box.h}`);
         const [p1, p2] = slot.ul;
-        p1.setAttribute("d", w.underline);
-        p1.setAttribute("stroke", COLORS.ink);
-        p1.setAttribute("stroke-width", String(w.fontPx * 0.2));
-        p1.setAttribute("stroke-dasharray", String(w.underlineLen + 4));
-        p2.setAttribute("d", w.underline);
-        p2.setAttribute("stroke", col(w.color));
-        p2.setAttribute("stroke-width", String(w.fontPx * 0.1));
-        p2.setAttribute("stroke-dasharray", String(w.underlineLen + 4));
+        if (isQuietArt) {
+          p1.setAttribute("stroke-width", "0");
+          p2.setAttribute("d", w.underline);
+          p2.setAttribute("stroke", col(w.color));
+          p2.setAttribute("stroke-width", String(Math.max(1.5, w.fontPx * 0.035)));
+          p2.setAttribute("stroke-dasharray", String(w.underlineLen + 4));
+        } else {
+          p1.setAttribute("d", w.underline);
+          p1.setAttribute("stroke", COLORS.ink);
+          p1.setAttribute("stroke-width", String(w.fontPx * 0.2));
+          p1.setAttribute("stroke-dasharray", String(w.underlineLen + 4));
+          p2.setAttribute("d", w.underline);
+          p2.setAttribute("stroke", col(w.color));
+          p2.setAttribute("stroke-width", String(w.fontPx * 0.1));
+          p2.setAttribute("stroke-dasharray", String(w.underlineLen + 4));
+        }
       }
     }
 
@@ -483,6 +510,7 @@ function applyState(pool: Pool, v: ChunkVis, cfg: Plan["config"]): void {
 
   const isPop = cfg.preset === "playful-pop";
   const isMinPro = cfg.preset === "minimal-pro";
+  const isQuietArt = cfg.preset === "quiet-art";
 
   pool.shake.style.transform = `translate(${v.shake.x}px, ${v.shake.y}px)`;
   pool.bg.style.transform = `scale(${v.bgScale})`;
@@ -512,6 +540,8 @@ function applyState(pool: Pool, v: ChunkVis, cfg: Plan["config"]): void {
       wr.text.style.setProperty("-webkit-text-stroke-color", wv.markerOn ? COLORS.cream : COLORS.ink);
     } else if (isMinPro && wr.word.role === "hero" && wv.markerOn) {
       wr.text.style.color = COLORS.slateDark;
+    } else if (isQuietArt && wr.word.role === "hero") {
+      wr.text.style.color = wv.markerOn ? col(wr.word.color) : COLORS.quietWhite;
     }
 
     if (wr.markerSvg.style.display !== "none") {

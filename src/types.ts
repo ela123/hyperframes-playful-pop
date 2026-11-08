@@ -1,21 +1,22 @@
 // Shared types. No runtime code here (kept strip-types friendly).
 
 export type Role = "hero" | "accent" | "normal" | "connector";
-export type PresetName = "playful-pop" | "minimal-pro" | "cinematic";
+export type PresetName = "playful-pop" | "minimal-pro" | "cinematic" | "quiet-art";
 export type Position = "bottom" | "center" | "top";
 export type AspectRatio = "16:9" | "9:16" | "1:1";
 export type AnimationStyle = "default" | "pop" | "subtle-fade" | "slide-up" | "scale-punch" | "static";
 
 export type EntranceName =
   | "sticker-slap" | "spin-pop" | "jelly" | "drop-bounce" | "pop" | "wiggle-in" | "fade-pop"
-  | "clean-fade" | "slide-fade-up" | "cinematic-drift";
+  | "clean-fade" | "slide-fade-up" | "cinematic-drift" | "soft-rise";
 export type EmphasisName =
   | "marker-highlight" | "wobble" | "squash-bounce" | "doodle-underline" | "star-burst"
-  | "pill-highlight" | "cinematic-glow" | "accent-color";
+  | "pill-highlight" | "cinematic-glow" | "accent-color" | "quiet-underline";
 export type ColorName =
   | "ink" | "cream" | "pink" | "yellow" | "sky" | "mint" | "violet"
   | "slateDark" | "slateMedium" | "snowWhite" | "emeraldAccent" | "electricBlue" | "amberGold" | "mutedGray"
-  | "obsidianDark" | "charcoalCard" | "platinumWhite" | "goldenAmber" | "champagne" | "cinematicTeal" | "deepCrimson";
+  | "obsidianDark" | "charcoalCard" | "platinumWhite" | "goldenAmber" | "champagne" | "cinematicTeal" | "deepCrimson"
+  | "quietWhite" | "quietBackdrop" | "quietAmber" | "quietOchre" | "quietUnderline";
 export type Quality = "preview" | "final";
 export type DoodleKind = "star" | "sparkle" | "heart" | "squiggle" | "arrow" | "circle" | "zigzag";
 

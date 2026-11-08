@@ -1,9 +1,9 @@
 {
   "video": "assets/intro.mp4",
   "footageIsLight": false,
-  "preset": "playful-pop",
+  "preset": "quiet-art",
   "position": "bottom",
   "aspectRatio": "16:9",
   "fontSize": 1.0,
-  "maxWordsPerCaption": 6
+  "maxWordsPerCaption": 4
 }
