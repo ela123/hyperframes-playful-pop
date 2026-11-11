@@ -63,8 +63,8 @@ export function chunkVis(c: ChunkPlan, frame: number, cfg: PopConfig): ChunkVis 
     shake: { x: r3(sx), y: r3(sy) },
     textScale: r3(par.text), bgScale: r3(par.bg),
     lines: lineExit.map((p, i) => {
-      const e = exitState(p, c.exitRots[i], isQuietArt);
-      return { transform: `rotate(${r3(e.rot)}deg) scale(${r3(e.scale)})`, o: e.o };
+      const e = exitState(p, 0, true);
+      return { transform: `scale(${r3(e.scale)})`, o: e.o };
     }),
     words: c.words.map((w) => wordVis(w, frame, u)),
     doodles: c.doodles.map((d) => { const s = doodleState(d, lf, xp); return { x: r3(s.x), y: r3(s.y), rot: r3(s.rot), s: r3(s.s) }; }),

@@ -2,7 +2,10 @@ import { execFileSync } from "node:child_process";
 import { existsSync, readFileSync } from "node:fs";
 import { dirname, join, resolve } from "node:path";
 import { fileURLToPath } from "node:url";
-import type { AnimationStyle, AspectRatio, Position, PresetName, Quality } from "../src/types.ts";
+import type {
+  AnimationStyle, AspectRatio, ConfigCaptionItem, EffectFamily, Intensity,
+  PaletteConfig, Position, PresetName, Quality,
+} from "../src/types.ts";
 
 export const ROOT = resolve(dirname(fileURLToPath(import.meta.url)), "..");
 export const P = {
@@ -20,8 +23,10 @@ export const P = {
 
 export interface UserConfig {
   video: string;
-  footageIsLight: boolean;
+  footageIsLight?: boolean;
+  effect?: EffectFamily | PresetName;
   preset?: PresetName;
+  intensity?: Intensity;
   position?: Position;
   aspectRatio?: AspectRatio;
   animationStyle?: AnimationStyle;
@@ -29,7 +34,10 @@ export interface UserConfig {
   font?: string;
   textColor?: string;
   highlightColor?: string;
+  backdropColor?: string;
+  palette?: PaletteConfig;
   maxWordsPerCaption?: number;
+  captions?: ConfigCaptionItem[];
 }
 
 export function loadUserConfig(): UserConfig {
@@ -37,12 +45,13 @@ export function loadUserConfig(): UserConfig {
   const base: UserConfig = {
     video: "assets/intro.mp4",
     footageIsLight: false,
-    preset: "playful-pop",
+    effect: "kinetic-pop",
+    intensity: "subtle",
     position: "bottom",
     aspectRatio: "16:9",
     animationStyle: "default",
     fontSize: 1.0,
-    maxWordsPerCaption: 6,
+    maxWordsPerCaption: 4,
   };
   return existsSync(f) ? { ...base, ...JSON.parse(readFileSync(f, "utf8")) } : base;
 }

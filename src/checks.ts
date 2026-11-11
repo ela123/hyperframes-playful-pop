@@ -39,7 +39,7 @@ export function checkReadability(plan: Plan): CheckResult {
   let ok = true;
   for (const c of plan.chunks) for (const w of c.words) {
     if (w.role !== "hero") continue;
-    const st = entranceState(w.entrance.name, (w.spokenStart + 8 - w.entrance.start) / w.entrance.dur, plan.config.unit, w.wobbleSign);
+    const st = entranceState(w.entrance.name, (w.spokenStart + 8 - w.entrance.start) / w.entrance.dur, plan.config.unit, w.wobbleSign, plan.config.intensity);
     const good = st.o === 1 && st.sx === 1 && st.sy === 1 && st.rot === 0 && st.x === 0 && st.y === 0;
     if (!good) { ok = false; lines.push(`hero "${w.text}" (chunk ${c.index}) not fully visible at final scale within 8f of its start`); }
     if (w.entrance.start > w.spokenStart) { ok = false; lines.push(`hero "${w.text}" enters later than its spoken start`); }
@@ -51,10 +51,13 @@ export function checkPalette(plan: Plan): CheckResult {
   const lines: string[] = [];
   let ok = true;
   for (const c of plan.chunks) {
-    const col = c.words.filter((w) => w.role === "hero" || w.role === "accent");
-    for (let i = 1; i < col.length; i++) if (col[i].color === col[i - 1].color) { ok = false; lines.push(`chunk ${c.index}: "${col[i - 1].text}" and "${col[i].text}" share ${col[i].color}`); }
+    const accented = c.words.filter((w) => w.role === "hero" && w.color !== "canvasText");
+    if (accented.length > 1) {
+      ok = false;
+      lines.push(`chunk ${c.index}: multiple accented words in one chunk (${accented.map((w) => w.text).join(", ")})`);
+    }
   }
-  return { name: "palette rule (no repeated color in a row)", ok, lines };
+  return { name: "palette rule (cohesive palette, max 1 accent per chunk)", ok, lines };
 }
 
 export function checkTiming(plan: Plan): CheckResult {

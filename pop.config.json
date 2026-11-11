@@ -1,9 +1,15 @@
 {
   "video": "assets/intro.mp4",
-  "footageIsLight": false,
-  "preset": "quiet-art",
+  "effect": "kinetic-pop",
+  "intensity": "subtle",
   "position": "bottom",
   "aspectRatio": "16:9",
   "fontSize": 1.0,
-  "maxWordsPerCaption": 4
+  "maxWordsPerCaption": 4,
+  "font": "default",
+  "palette": {
+    "text": "canvasText",
+    "backdrop": "canvasBackdrop",
+    "accent": "canvasAccent"
+  }
 }

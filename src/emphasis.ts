@@ -1,116 +1,121 @@
 // Emphasis while spoken. Pure functions of f = frames since the word's spoken start.
+// Strict anti-distraction rules:
+// - Never apply emphasis to every word or line.
+// - Max 1 element highlighted per caption chunk.
+// - Settle cleanly into a static, readable state.
 import type { EmphasisName, PresetName, Role } from "./types.ts";
-import { TIMING } from "./tokens.ts";
-import { clamp01, easeInCubic, easeOutCubic, lerp } from "./lib/easing.ts";
-import { rng } from "./lib/prng.ts";
+import { clamp01, easeOutCubic } from "./lib/easing.ts";
 
-export const ACCENT_EMPHASIS: EmphasisName[] = ["wobble", "squash-bounce", "doodle-underline"];
-
-/** Hero & accent emphasis customized per preset. */
 export function pickEmphasis(
   role: Role,
   seed: number,
   prevAccent: EmphasisName | null,
-  preset: PresetName = "playful-pop",
+  preset: PresetName = "kinetic-pop",
 ): EmphasisName[] {
-  if (preset === "quiet-art") {
-    if (role === "hero") return ["quiet-underline"];
-    return [];
-  }
-  if (preset === "minimal-pro") {
-    if (role === "hero") return ["pill-highlight"];
-    if (role === "accent") return ["accent-color"];
-    return [];
-  }
-  if (preset === "cinematic") {
-    if (role === "hero") return ["cinematic-glow"];
-    if (role === "accent") return ["accent-color"];
-    return [];
-  }
+  // Only the hero receives emphasis; non-hero words stay clean and still
+  if (role !== "hero") return [];
 
-  // playful-pop
-  if (role === "hero") return ["marker-highlight", "star-burst"];
-  if (role !== "accent") return [];
-  let k = rng(seed).int(0, 2);
-  if (ACCENT_EMPHASIS[k] === prevAccent) k = (k + 1) % 3;
-  return [ACCENT_EMPHASIS[k]];
+  switch (preset) {
+    case "flicker-strobe":
+    case "cinematic":
+      return ["soft-glow"];
+    case "digital-decoder":
+      return ["decoder-glitch"];
+    case "typewriter-terminal":
+    case "quiet-art":
+      return ["cursor-blink"];
+    case "speed-slide":
+    case "minimal-pro":
+      return ["accent-color"];
+    case "kinetic-pop":
+    case "playful-pop":
+    default:
+      return ["pop-overshoot", "accent-color"];
+  }
 }
 
 export interface EmphasisState {
-  rot: number; sx: number; sy: number;
-  marker: number;          // 0..1 wipe amount (scaleX), 0 = hidden
-  markerActive: boolean;   // text turns ink while the marker is up
-  underline: number;       // 0..1 stroke draw progress
-  stars: number;           // 0..1 progress of the star burst, <0 = not started, >1 = done
+  rot: number;
+  sx: number;
+  sy: number;
+  marker: number;
+  markerActive: boolean;
+  underline: number;
+  stars: number;
+  glow: number;
+  glitchActive: boolean;
+  cursorVisible: boolean;
 }
-export const NO_EMPHASIS: EmphasisState = { rot: 0, sx: 1, sy: 1, marker: 0, markerActive: false, underline: 0, stars: -1 };
+
+export const NO_EMPHASIS: EmphasisState = {
+  rot: 0, sx: 1, sy: 1, marker: 0, markerActive: false, underline: 0, stars: -1,
+  glow: 0, glitchActive: false, cursorVisible: false,
+};
 
 export function emphasisState(names: EmphasisName[], f: number, dur: number, wobbleSign: number): EmphasisState {
   const s: EmphasisState = { ...NO_EMPHASIS };
   if (f < 0 || names.length === 0) return s;
+
   for (const n of names) {
     switch (n) {
-      case "quiet-underline": {
-        const wipe = clamp01(f / 6);
-        s.underline = easeOutCubic(wipe);
+      case "soft-glow": {
+        // Soft ambient warm glow during spoken window, smoothly settling
+        const progress = clamp01(f / Math.max(dur, 1));
+        s.glow = easeOutCubic(1 - Math.abs(progress - 0.5) * 0.8);
+        s.markerActive = f >= 0 && f < dur + 2;
+        break;
+      }
+
+      case "decoder-glitch": {
+        // Only glitch/decode during the first 6-8 frames (<= 0.27s), then 100% still
+        s.glitchActive = f >= 0 && f < 7;
         s.markerActive = f >= 0;
         break;
       }
-      case "pill-highlight": {
-        const wipe = clamp01(f / 3);
-        const release = clamp01((f - dur) / 3);
-        s.marker = easeOutCubic(wipe) * (1 - easeInCubic(release));
-        s.markerActive = f < dur + 3 && f >= 0;
+
+      case "cursor-blink": {
+        // Subtle terminal cursor blink (2 blinks per second, soft)
+        const blinkCycle = Math.floor(f / 8) % 2 === 0;
+        s.cursorVisible = blinkCycle && f >= 0 && f < dur + 6;
+        s.markerActive = f >= 0;
         break;
       }
-      case "cinematic-glow": {
-        const p = clamp01(f / Math.max(dur, 1));
-        s.markerActive = f >= 0 && f < dur + 4;
-        s.sx = lerp(1, 1.04, Math.sin(p * Math.PI));
-        s.sy = s.sx;
-        break;
-      }
+
+      case "pop-overshoot":
       case "accent-color": {
         s.markerActive = f >= 0 && f < dur + 2;
         break;
       }
+
+      // Legacy fallback handlers
+      case "pill-highlight":
       case "marker-highlight": {
-        const wipe = clamp01(f / TIMING.markerWipe);
-        const release = clamp01((f - dur) / TIMING.markerRelease);
-        s.marker = easeOutCubic(wipe) * (1 - easeInCubic(release));
-        s.markerActive = f < dur + TIMING.markerRelease && f >= 0;
+        s.marker = clamp01(f / 4);
+        s.markerActive = f >= 0 && f < dur + 2;
         break;
       }
-      case "wobble": {
-        const decay = clamp01(1 - f / Math.max(dur, 1));
-        s.rot = 4 * wobbleSign * Math.sin(f * 0.9) * decay;
+      case "cinematic-glow": {
+        s.glow = clamp01(f / 6);
+        s.markerActive = f >= 0 && f < dur + 2;
         break;
       }
-      case "squash-bounce": {
-        const p = clamp01(f / TIMING.squashFrames);
-        if (p < 1) {
-          // 1.0 -> 1.18/0.88 -> 0.95/1.06 -> 1.0
-          if (p < 0.3) { const e = easeOutCubic(p / 0.3); s.sx = lerp(1, 1.18, e); s.sy = lerp(1, 0.88, e); }
-          else if (p < 0.65) { const e = easeOutCubic((p - 0.3) / 0.35); s.sx = lerp(1.18, 0.95, e); s.sy = lerp(0.88, 1.06, e); }
-          else { const e = easeOutCubic((p - 0.65) / 0.35); s.sx = lerp(0.95, 1, e); s.sy = lerp(1.06, 1, e); }
-        }
+      case "quiet-underline":
+      case "doodle-underline": {
+        s.underline = clamp01(f / 6);
+        s.markerActive = f >= 0;
         break;
       }
-      case "doodle-underline":
-        s.underline = easeOutCubic(clamp01(f / TIMING.underlineDraw));
-        break;
+      case "wobble":
+      case "squash-bounce":
       case "star-burst":
-        s.stars = f / TIMING.starFrames;
         break;
     }
   }
+
   return s;
 }
 
-/** One star of the burst: position along its seeded angle (ease-out) and fade. */
-export function starState(p: number, angleDeg: number, dist: number): { x: number; y: number; o: number; s: number } {
-  if (p < 0 || p > 1) return { x: 0, y: 0, o: 0, s: 0 };
-  const e = easeOutCubic(p);
-  const a = (angleDeg * Math.PI) / 180;
-  return { x: Math.cos(a) * dist * e, y: Math.sin(a) * dist * e, o: 1 - easeInCubic(p), s: lerp(0.4, 1, e) };
+export function starState(p: number, angle: number, dist: number): { x: number; y: number; o: number; s: number } {
+  return { x: 0, y: 0, o: 0, s: 0 };
 }
+

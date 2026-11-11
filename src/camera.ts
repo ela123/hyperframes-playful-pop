@@ -1,15 +1,17 @@
-// Camera feel: short decaying shake on hero starts + slow push-in parallax. Pure functions of the frame.
+// Camera feel: pure functions of the frame.
+// Camera shakes are disabled by default in accordance with anti-distraction rules.
 import { CAMERA } from "./tokens.ts";
 import { clamp01 } from "./lib/easing.ts";
 
 export function shakeOffset(frameSince: number, dx: number, dy: number, u: number): { x: number; y: number } {
-  if (frameSince < 0 || frameSince >= CAMERA.shakeFrames) return { x: 0, y: 0 };
+  if (CAMERA.shakeAmpPx <= 0 || frameSince < 0 || frameSince >= CAMERA.shakeFrames) return { x: 0, y: 0 };
   const amp = CAMERA.shakeAmpPx * u * Math.exp(-0.7 * frameSince);
   return { x: dx * amp * Math.cos(frameSince * 2.1), y: dy * amp * Math.sin(frameSince * 2.1 + 0.6) };
 }
 
-/** Accept hero start frames with at most one shake per 20 frames. */
+/** In the refactored artistic engine, camera shakes are silenced to keep text calm and readable. */
 export function scheduleShakes(frames: number[]): number[] {
+  if (CAMERA.shakeAmpPx <= 0) return [];
   const out: number[] = [];
   let last = -1e9;
   for (const f of [...frames].sort((a, b) => a - b)) {

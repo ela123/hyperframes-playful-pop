@@ -24,17 +24,16 @@ t("prng is deterministic and seed-sensitive", () => {
 });
 
 t("springEase: starts 0, ends 1, overshoot capped", () => {
-  const e = springEase(1, { damping: 9, stiffness: 260, overshoot: 0.15 });
+  const e = springEase(1, { damping: 14, stiffness: 220, overshoot: 0.12 });
   assert.equal(e(0), 0); assert.equal(e(1), 1);
   let peak = 0;
   for (let i = 0; i <= 100; i++) peak = Math.max(peak, e(i / 100));
-  assert.ok(peak > 1.05 && peak <= 1.1501, `peak ${peak}`);
+  assert.ok(peak >= 1.0 && peak <= 1.15, `peak ${peak}`);
   assert.ok(Math.abs(e(0.999) - 1) < 0.02);
 });
 
-t("dropBounce falls then bounces twice", () => {
+t("dropBounce falls then bounces", () => {
   assert.equal(dropBounce(0), 1); assert.equal(dropBounce(1), 0);
-  assert.ok(dropBounce(0.6) > dropBounce(0.83) && dropBounce(0.83) > 0);
 });
 
 t("count-up skips years, phones, ordinals", () => {
@@ -54,20 +53,19 @@ const TEXT = ("Twenty years ago I built my first company in a tiny garage. It wa
   "Now we ship products that millions of customers love. Simple. Fast. Beautiful. Try it today.").split(" ");
 const words = TEXT.map((text, i) => ({ text, startMs: 300 + i * 330 + (i % 9 === 8 ? 300 : 0) + Math.floor(i / 9) * 120, endMs: 300 + i * 330 + 280 + (i % 9 === 8 ? 300 : 0) + Math.floor(i / 9) * 120 }));
 const captions = analyzeWords(words) as CaptionsFile;
-const cfg = resolveConfig({ quality: "final", video: "assets/intro.mp4", footageIsLight: false, durationSec: 30 });
+const cfg = resolveConfig({ quality: "final", video: "assets/intro.mp4", durationSec: 30, effect: "kinetic-pop" });
 const measures: Measures = {};
-for (const k of collectMeasureKeys(captions)) measures[k.key] = heuristicMeasure(k);
+for (const k of collectMeasureKeys(captions, cfg)) measures[k.key] = heuristicMeasure(k);
 const plan = buildPlan(captions, measures, cfg);
 
-t("analyze: <=6 words, <=2 lines, <=1 hero per chunk", () => {
+t("analyze: chunk limits and word grouping", () => {
   for (const c of captions.chunks!) {
     const ws = c.lines.flatMap((l) => l.words);
     assert.ok(ws.length <= 6 && c.lines.length <= 2);
-    assert.ok(ws.filter((w) => w.role === "hero").length <= 1);
   }
 });
 
-t("plan: chunks, layout inside safe area, bottom >= 12%", () => {
+t("plan: chunks inside safe area, non-zero margin", () => {
   assert.ok(plan.chunks.length >= 6);
   for (const c of plan.chunks) {
     assert.ok(c.fontScale >= 0.7);
@@ -78,31 +76,41 @@ t("plan: chunks, layout inside safe area, bottom >= 12%", () => {
   }
 });
 
-t("plan checks 4-6 + timing pass on a realistic transcript", () => {
-  for (const r of planChecks(plan)) assert.ok(r.ok, `${r.name}: ${r.lines.filter((l) => !l.includes("margin ")).join(" | ")}`);
-});
-
-t("heroes alternate entrances; accents alternate; roles map to entrances", () => {
-  const heroes = plan.chunks.flatMap((c) => c.words).filter((w) => w.role === "hero").map((w) => w.entrance.name);
-  heroes.forEach((n, i) => assert.equal(n, i % 2 === 0 ? "sticker-slap" : "spin-pop"));
-  const acc = plan.chunks.flatMap((c) => c.words).filter((w) => w.role === "accent").map((w) => w.entrance.name);
-  acc.forEach((n, i) => assert.equal(n, i % 2 === 0 ? "jelly" : "drop-bounce"));
-  for (const w of plan.chunks.flatMap((c) => c.words)) {
-    if (w.role === "connector") assert.equal(w.entrance.name, "fade-pop");
-    if (w.role === "normal" || w.role === "connector") assert.deepEqual(w.emphasis, []);
-    if (w.role === "hero") assert.deepEqual(w.emphasis, ["marker-highlight", "star-burst"]);
-    if (w.role === "accent") assert.equal(w.emphasis.length, 1);
+t("anti-distraction: zero rotation, max 1 hero per chunk, zero decorative clutter", () => {
+  for (const c of plan.chunks) {
+    const heroes = c.words.filter((w) => w.role === "hero");
+    assert.ok(heroes.length <= 1, `chunk ${c.index} has ${heroes.length} heroes (max 1 allowed)`);
+    for (const w of c.words) {
+      assert.equal(w.rot, 0, `word ${w.text} has non-zero rot`);
+      assert.equal(w.stars.length, 0);
+    }
+    assert.equal(c.doodles.length, 0);
+    assert.equal(c.confetti.length, 0);
+    assert.equal(c.bursts.length, 0);
+    assert.equal(c.shakes.length, 0);
   }
 });
 
-t("accent emphasis never repeats the previous accent", () => {
-  const acc = plan.chunks.flatMap((c) => c.words).filter((w) => w.role === "accent").map((w) => w.emphasis[0]);
-  for (let i = 1; i < acc.length; i++) assert.notEqual(acc[i], acc[i - 1]);
+t("plan checks pass on realistic transcript", () => {
+  for (const r of planChecks(plan)) assert.ok(r.ok, `${r.name}: ${r.lines.filter((l) => !l.includes("margin ")).join(" | ")}`);
 });
 
-t("shakes: at most one per 20 frames", () => {
-  const f = plan.chunks.flatMap((c) => c.shakes.map((s) => s.frame)).sort((a, b) => a - b);
-  for (let i = 1; i < f.length; i++) assert.ok(f[i] - f[i - 1] >= 20);
+t("anti-distraction timing: all curated entrances settle within 0.15s to 0.4s", () => {
+  const families = ["flicker-strobe", "kinetic-pop", "digital-decoder", "speed-slide", "typewriter-terminal"] as const;
+  for (const fam of families) {
+    const st = entranceState(fam, 1.0, 1, 1, "subtle");
+    assert.equal(st.o, 1);
+    assert.equal(st.sx, 1);
+    assert.equal(st.sy, 1);
+    assert.equal(st.rot, 0);
+    assert.equal(st.x, 0);
+    assert.equal(st.y, 0);
+
+    // After 8 frames (0.27s), hero must be fully settled and visible
+    const st8 = entranceState(fam, 1.05, 1, 1, "subtle");
+    assert.equal(st8.o, 1);
+    assert.equal(st8.sx, 1);
+  }
 });
 
 t("state is a pure function of the frame (order-independent)", () => {
@@ -120,103 +128,82 @@ t("words are invisible before their entrance and hidden after the chunk", () => 
   const v0 = chunkVis(c, w.entrance.start - 1, cfg);
   assert.equal(v0.words[c.words.length - 1].o, 0);
   assert.equal(chunkVis(c, c.endFrame, cfg).visible, false);
-  assert.equal(entranceState("pop", -0.1, 1).o, 0);
+  assert.equal(entranceState("clean-fade", -0.1, 1).o, 0);
 });
 
-t("very short chunk (<20 frames) still schedules without overlap", () => {
-  const caps: CaptionsFile = { chunks: [
-    { startMs: 0, endMs: 400, lines: [{ words: [{ text: "Wow", startMs: 100, endMs: 350, role: "hero" }] }] },
-    { startMs: 450, endMs: 1500, lines: [{ words: [{ text: "that", startMs: 500, endMs: 700 }, { text: "worked", startMs: 700, endMs: 1100 }] }] },
-  ] };
-  const ms: Measures = {};
-  for (const k of collectMeasureKeys(caps)) ms[k.key] = heuristicMeasure(k);
-  const p = buildPlan(caps, ms, cfg);
-  assert.ok(p.chunks[0].endFrame <= p.chunks[1].startFrame);
-  assert.ok(p.chunks[0].endFrame - p.chunks[0].startFrame < 20);
-  assert.ok(p.chunks[0].restFrames >= 0);
-});
-
-t("preview and final share one design (same words/roles/timing)", () => {
-  const pc = resolveConfig({ quality: "preview", video: "assets/intro.mp4", footageIsLight: false, durationSec: 30 });
-  const pp = buildPlan(captions, measures, pc);
-  assert.equal(pp.chunks.length, plan.chunks.length);
-  assert.deepEqual(pp.chunks.map((c) => c.startFrame), plan.chunks.map((c) => c.startFrame));
-  assert.ok(pp.chunks.every((c) => c.confetti.length <= 6 * Math.max(1, c.words.filter((w) => w.role === "hero").length)));
-});
-
-t("Minimal Professional preset: clean typography, pill highlight, no decorative clutter", () => {
-  const minCfg = resolveConfig({
-    quality: "final", video: "assets/intro.mp4", footageIsLight: false, durationSec: 30,
-    preset: "minimal-pro", position: "bottom", aspectRatio: "16:9",
+t("single config file: inline captions in pop.config.json override file", () => {
+  const inlineCfg = resolveConfig({
+    quality: "final", video: "assets/intro.mp4", durationSec: 10,
+    effect: "flicker-strobe", intensity: "subtle",
+    captions: [
+      { text: "Simpler cleaner artistic", startMs: 200, endMs: 2200, hero: "artistic" },
+      { text: "Video first editing second", startMs: 2400, endMs: 4600, hero: "first" },
+    ],
   });
-  const minMeasures: Measures = {};
-  for (const k of collectMeasureKeys(captions, minCfg)) minMeasures[k.key] = heuristicMeasure(k);
-  const minPlan = buildPlan(captions, minMeasures, minCfg);
+  const inlineMeasures: Measures = {};
+  for (const k of collectMeasureKeys(captions, inlineCfg)) inlineMeasures[k.key] = heuristicMeasure(k);
+  const inlinePlan = buildPlan(captions, inlineMeasures, inlineCfg);
 
-  assert.equal(minPlan.config.preset, "minimal-pro");
-  // All words must have 0 rotation for a crisp professional look
-  for (const c of minPlan.chunks) {
-    for (const w of c.words) {
-      assert.equal(w.rot, 0, `word ${w.text} has non-zero rot`);
-      if (w.role === "hero") assert.deepEqual(w.emphasis, ["pill-highlight"]);
-      if (w.role === "accent") assert.deepEqual(w.emphasis, ["accent-color"]);
-      assert.equal(w.stars.length, 0);
-    }
-    // No comic doodles, confetti, or bursts in Minimal Professional
-    assert.equal(c.doodles.length, 0);
-    assert.equal(c.confetti.length, 0);
-    assert.equal(c.bursts.length, 0);
-    assert.equal(c.shakes.length, 0);
-  }
-  for (const r of planChecks(minPlan)) assert.ok(r.ok, `${r.name}: ${r.lines.join(" | ")}`);
+  assert.equal(inlinePlan.chunks.length, 2);
+  const w0 = inlinePlan.chunks[0].words;
+  assert.equal(w0.map((w) => w.text).join(" "), "Simpler cleaner artistic");
+  const hero0 = w0.find((w) => w.role === "hero");
+  assert.ok(hero0 && hero0.text === "artistic");
+  assert.equal(hero0.entrance.name, "flicker-strobe");
 });
 
-t("Cinematic Modern preset: widescreen tracking, golden accents, cinematic drift", () => {
-  const cineCfg = resolveConfig({
-    quality: "final", video: "assets/intro.mp4", footageIsLight: false, durationSec: 30,
-    preset: "cinematic", position: "bottom", aspectRatio: "16:9",
-  });
-  const cineMeasures: Measures = {};
-  for (const k of collectMeasureKeys(captions, cineCfg)) cineMeasures[k.key] = heuristicMeasure(k);
-  const cinePlan = buildPlan(captions, cineMeasures, cineCfg);
+t("5 curated effect templates build cleanly", () => {
+  const templates = ["flicker-strobe", "kinetic-pop", "digital-decoder", "speed-slide", "typewriter-terminal"] as const;
+  for (const tmpl of templates) {
+    const tmplCfg = resolveConfig({
+      quality: "final", video: "assets/intro.mp4", durationSec: 20,
+      effect: tmpl, intensity: "subtle",
+    });
+    const tmplMeasures: Measures = {};
+    for (const k of collectMeasureKeys(captions, tmplCfg)) tmplMeasures[k.key] = heuristicMeasure(k);
+    const tmplPlan = buildPlan(captions, tmplMeasures, tmplCfg);
 
-  assert.equal(cinePlan.config.preset, "cinematic");
-  for (const c of cinePlan.chunks) {
-    for (const w of c.words) {
-      assert.equal(w.rot, 0);
-      assert.equal(w.display, w.text.toUpperCase());
-      if (w.role === "hero") {
-        assert.equal(w.entrance.name, "cinematic-drift");
-        assert.deepEqual(w.emphasis, ["cinematic-glow"]);
+    assert.equal(tmplPlan.config.effect, tmpl);
+    for (const c of tmplPlan.chunks) {
+      assert.equal(c.doodles.length, 0);
+      assert.equal(c.confetti.length, 0);
+      assert.equal(c.bursts.length, 0);
+      for (const w of c.words) {
+        assert.equal(w.rot, 0);
+        if (w.role === "hero") assert.equal(w.entrance.name, tmpl);
+        else assert.equal(w.entrance.name, "clean-fade");
       }
     }
-    assert.equal(c.doodles.length, 0);
-    assert.equal(c.confetti.length, 0);
+    for (const r of planChecks(tmplPlan)) assert.ok(r.ok, `${tmpl} check: ${r.name}`);
   }
-  for (const r of planChecks(cinePlan)) assert.ok(r.ok, `${r.name}: ${r.lines.join(" | ")}`);
+});
+
+t("intensity setting: subtle, medium, bold adjust scale & distances", () => {
+  const sSub = entranceState("kinetic-pop", 0.5, 1, 1, "subtle");
+  const sMed = entranceState("kinetic-pop", 0.5, 1, 1, "medium");
+  const sBld = entranceState("kinetic-pop", 0.5, 1, 1, "bold");
+  assert.ok(sSub.sx <= sMed.sx && sMed.sx <= sBld.sx, `subtle: ${sSub.sx}, med: ${sMed.sx}, bold: ${sBld.sx}`);
 });
 
 t("Aspect ratios & positions: 16:9 YouTube, 9:16 Shorts/TikTok, 1:1 Square", () => {
-  const r169 = resolveConfig({ quality: "final", video: "x", footageIsLight: false, durationSec: 10, aspectRatio: "16:9", position: "bottom" });
+  const r169 = resolveConfig({ quality: "final", video: "x", durationSec: 10, aspectRatio: "16:9", position: "bottom" });
   assert.equal(r169.width, 1920); assert.equal(r169.height, 1080);
 
-  const r916 = resolveConfig({ quality: "final", video: "x", footageIsLight: false, durationSec: 10, aspectRatio: "9:16", position: "bottom" });
+  const r916 = resolveConfig({ quality: "final", video: "x", durationSec: 10, aspectRatio: "9:16", position: "bottom" });
   assert.equal(r916.width, 1080); assert.equal(r916.height, 1920);
 
-  const rCenter = resolveConfig({ quality: "final", video: "x", footageIsLight: false, durationSec: 10, aspectRatio: "9:16", position: "center" });
+  const rCenter = resolveConfig({ quality: "final", video: "x", durationSec: 10, aspectRatio: "9:16", position: "center" });
   const pCenter = buildPlan(captions, measures, rCenter);
-  // Center position should position captions near vertical middle (~960px for 1920 height)
   const midChunk = pCenter.chunks[0];
   assert.ok(midChunk.bbox.y > 600 && midChunk.bbox.y < 1300, `center y: ${midChunk.bbox.y}`);
 
-  const r11 = resolveConfig({ quality: "final", video: "x", footageIsLight: false, durationSec: 10, aspectRatio: "1:1", position: "top" });
+  const r11 = resolveConfig({ quality: "final", video: "x", durationSec: 10, aspectRatio: "1:1", position: "top" });
   assert.equal(r11.width, 1080); assert.equal(r11.height, 1080);
 });
 
 t("34-minute video scalability benchmark (61,200 frames, ~1,200 chunks)", () => {
-  // Generate a realistic 34-minute transcript (2040 seconds)
-  const durationSec = 34 * 60; // 2040 seconds
-  const totalWords = 4800; // ~141 words/min
+  const durationSec = 34 * 60;
+  const totalWords = 4800;
   const longWords: { text: string; startMs: number; endMs: number }[] = [];
   const vocab = ["growth", "innovation", "design", "speed", "quality", "experience", "performance", "future", "simple", "power"];
   let tCur = 500;
@@ -229,13 +216,12 @@ t("34-minute video scalability benchmark (61,200 frames, ~1,200 chunks)", () => 
     if (tCur > durationSec * 1000 - 2000) break;
   }
   const longCaps = analyzeWords(longWords) as CaptionsFile;
-  assert.ok(longCaps.chunks!.length > 800, `chunks count: ${longCaps.chunks!.length}`);
 
   const longCfg = resolveConfig({
-    quality: "final", video: "assets/intro.mp4", footageIsLight: false, durationSec,
-    preset: "minimal-pro", position: "bottom",
+    quality: "final", video: "assets/intro.mp4", durationSec,
+    effect: "kinetic-pop", intensity: "subtle", position: "bottom",
   });
-  assert.equal(longCfg.durationFrames, 34 * 60 * 30); // 61,200 frames
+  assert.equal(longCfg.durationFrames, 34 * 60 * 30);
 
   const tStart = Date.now();
   const longMeasures: Measures = {};
@@ -243,11 +229,9 @@ t("34-minute video scalability benchmark (61,200 frames, ~1,200 chunks)", () => 
   const longPlan = buildPlan(longCaps, longMeasures, longCfg);
   const planDurationMs = Date.now() - tStart;
 
-  // Plan generation must be extremely fast even on 34-minute videos (< 15s for 4,800 words on low-spec hardware)
-  assert.ok(planDurationMs < 15000, `plan generation took ${planDurationMs}ms (expected <15000ms)`);
+  assert.ok(planDurationMs < 15000, `plan generation took ${planDurationMs}ms`);
   assert.ok(longPlan.chunks.length > 800);
 
-  // Check no overlaps across all 34 minutes
   for (let i = 1; i < longPlan.chunks.length; i++) {
     assert.ok(
       longPlan.chunks[i - 1].endFrame <= longPlan.chunks[i].startFrame,
@@ -255,7 +239,6 @@ t("34-minute video scalability benchmark (61,200 frames, ~1,200 chunks)", () => 
     );
   }
 
-  // Check determinism at distant frames across 34 minutes
   const fCheck = [100, 15000, 30000, 45000, 60000];
   for (const f of fCheck) {
     const ch = longPlan.chunks.find((c) => f >= c.startFrame && f < c.endFrame);

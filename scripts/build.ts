@@ -26,7 +26,9 @@ export async function buildAll(quality = qualityArg()): Promise<void> {
     video: user.video,
     footageIsLight: user.footageIsLight,
     durationSec,
+    effect: user.effect || user.preset,
     preset: user.preset,
+    intensity: user.intensity,
     position: user.position,
     aspectRatio: user.aspectRatio,
     animationStyle: user.animationStyle,
@@ -34,7 +36,10 @@ export async function buildAll(quality = qualityArg()): Promise<void> {
     font: user.font,
     textColor: user.textColor,
     highlightColor: user.highlightColor,
+    backdropColor: user.backdropColor,
+    palette: user.palette,
     maxWordsPerCaption: user.maxWordsPerCaption,
+    captions: user.captions,
   });
   const captions = JSON.parse(readFileSync(P.captions, "utf8")) as CaptionsFile;
 

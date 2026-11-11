@@ -55,5 +55,6 @@ export async function measureAll(keys: MeasureKey[]): Promise<{ measures: Measur
   }
   const measures: Measures = { ...cache.measures };
   for (const k of missing) measures[k.key] = heuristicMeasure(k);
+  try { writeFileSync(P.measures, JSON.stringify({ hash, measures }) + "\n"); } catch { /* ignore */ }
   return { measures, source: "heuristic" };
 }
